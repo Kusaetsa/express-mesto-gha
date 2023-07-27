@@ -51,10 +51,10 @@ function likeCard(req, res) {
     .orFail()
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
       return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
@@ -75,10 +75,10 @@ function dislikeCard(req, res) {
       return res.status(OK).send(card);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
       }
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
       return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
