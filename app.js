@@ -24,16 +24,15 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
+app.use('/users', users);
+app.use('/cards', cards);
+
+app.use((req, res) => {
   const error = new Error('PageNotFound');
   error.status = ERROR_NOT_FOUND;
   error.message = 'Запрашиваемый путь не существует';
   res.status(error.status).json({ message: error.message });
-  next();
 });
-
-app.use('/users', users);
-app.use('/cards', cards);
 
 app.listen(PORT, () => {
   console.log(`Приложение запущено на порте ${PORT}`);
