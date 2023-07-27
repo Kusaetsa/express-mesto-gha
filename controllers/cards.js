@@ -28,14 +28,13 @@ function createCard(req, res) {
 
 function deleteCard(req, res) {
   return Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
-      }
-      return res.status(OK).send(card);
-    })
+    .orFail()
+    .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
+        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+      }
+      if (err.name === 'CastError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
       return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });

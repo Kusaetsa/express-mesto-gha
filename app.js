@@ -5,8 +5,8 @@ const { PORT = 3000 } = process.env;
 const mongoose = require('mongoose');
 
 const users = require('./routes/users');
-
 const cards = require('./routes/cards');
+const { ERROR_NOT_FOUND } = require('./utills/statusCodes');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -21,6 +21,14 @@ app.use((req, res, next) => {
   req.owner = {
     _id: '64c25b2d58913f1a509c20e8',
   };
+  next();
+});
+
+app.use((req, res, next) => {
+  const error = new Error('PageNotFound');
+  error.status = ERROR_NOT_FOUND;
+  error.message = 'Запрашиваемый путь не существует';
+  res.status(error.status).json({ message: error.message });
   next();
 });
 
