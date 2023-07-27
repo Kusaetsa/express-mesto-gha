@@ -38,7 +38,7 @@ function createUser(req, res) {
 function updateUserInfo(req, res) {
   console.log(req.owner);
   const { name, about } = req.body;
-  return User.findByIdAndUpdate(req.owner, { name, about })
+  User.findByIdAndUpdate(req.owner, { name, about }, { new: true })
     .then((user) => {
       if (!user) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
@@ -47,9 +47,9 @@ function updateUserInfo(req, res) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
-      return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
+      res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
     });
 }
 
