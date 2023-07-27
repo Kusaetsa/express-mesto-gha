@@ -48,13 +48,12 @@ function likeCard(req, res) {
     { $addToSet: { likes: req.owner._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
+    .orFail()
+    .then((card) => res.status(OK).send(card))
+    .catch((err) => {
+      if (err.name === 'CastError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
       }
-      return res.status(OK).send(card);
-    })
-    .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
@@ -68,6 +67,7 @@ function dislikeCard(req, res) {
     { $pull: { likes: req.owner._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => {
       if (!card) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
@@ -75,6 +75,9 @@ function dislikeCard(req, res) {
       return res.status(OK).send(card);
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
+      }
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }

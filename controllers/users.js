@@ -11,13 +11,14 @@ function getUsers(req, res) {
 
 function getUser(req, res) {
   return User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
+    .orFail()
+    .then((user) => res.status(OK).send(user))
+    .catch((err) => {
+      if (err.name === 'CastError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
       }
-      return res.status(OK).send(user);
-    })
-    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: `Ошибка по умолчанию ${err}` }));
+      return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
+    });
 }
 
 function createUser(req, res) {
