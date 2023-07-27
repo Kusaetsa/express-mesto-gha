@@ -36,9 +36,9 @@ function createUser(req, res) {
 }
 
 function updateUserInfo(req, res) {
-  console.log(req.owner);
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.owner, { name, about }, { new: true })
+    .orFail()
     .then((user) => {
       if (!user) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
@@ -54,9 +54,9 @@ function updateUserInfo(req, res) {
 }
 
 function updateUserAvatar(req, res) {
-  console.log(req.owner);
   const { avatar } = req.body;
-  return User.findByIdAndUpdate(req.owner, { avatar })
+  return User.findByIdAndUpdate(req.owner, { avatar }, { new: true })
+    .orFail()
     .then((user) => {
       if (!user) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
