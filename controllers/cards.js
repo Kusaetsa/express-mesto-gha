@@ -31,8 +31,8 @@ function deleteCard(req, res) {
     .orFail()
     .then((card) => res.status(OK).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
       }
       if (err.name === 'CastError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
