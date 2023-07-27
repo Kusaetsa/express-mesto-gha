@@ -1,10 +1,12 @@
 const User = require('../models/user');
-const { OK, CREATED, ERROR_BAD_REQUEST, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER } = require('../utills/statusCodes');
+const {
+  OK, CREATED, ERROR_BAD_REQUEST, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER,
+} = require('../utills/statusCodes');
 
 function getUsers(req, res) {
   return User.find({})
     .then((users) => res.status(OK).send(users))
-    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' }));
+    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: `Ошибка по умолчанию ${err}` }));
 }
 
 function getUser(req, res) {
@@ -15,7 +17,7 @@ function getUser(req, res) {
       }
       return res.status(OK).send(user);
     })
-    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' }));
+    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: `Ошибка по умолчанию ${err}` }));
 }
 
 function createUser(req, res) {
