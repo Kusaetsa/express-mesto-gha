@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
 const { ERROR_NOT_FOUND } = require('./utills/statusCodes');
+const { createUser, login } = require('./controllers/users');
+const { checkAuth } = require('./middlewares/auth');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -14,16 +16,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 });
 
 const app = express();
-
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.owner = {
-    _id: '64c25b2d58913f1a509c20e8',
-  };
-  next();
-});
-
+app.post('/signin', login);
+app.post('/signup', createUser);
+app.use(checkAuth);
 app.use('/users', users);
 app.use('/cards', cards);
 

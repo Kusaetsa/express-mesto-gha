@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const {
-  OK, CREATED, ERROR_BAD_REQUEST, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER,
+  OK, CREATED, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZATE, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER,
 } = require('../utills/statusCodes');
 
 function getCards(req, res) {
@@ -10,9 +10,9 @@ function getCards(req, res) {
 }
 
 function createCard(req, res) {
-  console.log(req.owner);
   const { name, link } = req.body;
-  return Card.create({ name, link, owner: req.owner })
+  const owner = req.user._id;
+  return Card.create({ name, link, owner })
     .then((card) => {
       res.status(CREATED).send(card);
     })
@@ -27,15 +27,20 @@ function createCard(req, res) {
 }
 
 function deleteCard(req, res) {
-  return Card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId)
     .orFail()
-    .then((card) => res.status(OK).send(card))
+    .then((card) => {
+      if (req.user._id !== card.owner.toString()) {
+        return res.status(ERROR_UNAUTHORIZATE).send({ message: 'Вы не можете удалять карточки других пользователей' });
+      }
+      return res.status(OK).send(card);
+    })
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
       }
       if (err.name === 'CastError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
       }
       return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
     });
@@ -44,7 +49,7 @@ function deleteCard(req, res) {
 function likeCard(req, res) {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.owner._id } },
+    { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .orFail()
@@ -63,16 +68,11 @@ function likeCard(req, res) {
 function dislikeCard(req, res) {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.owner._id } },
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
     .orFail()
-    .then((card) => {
-      if (!card) {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
-      }
-      return res.status(OK).send(card);
-    })
+    .then((card) => res.status(OK).send(card))
     .catch((err) => {
       if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка с указанным id не найдена' });
