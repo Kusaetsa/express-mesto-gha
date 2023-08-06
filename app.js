@@ -3,6 +3,7 @@ const express = require('express');
 const { PORT = 3000 } = process.env;
 
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 
 const users = require('./routes/users');
 const cards = require('./routes/cards');
@@ -32,6 +33,8 @@ app.use((req, res) => {
   error.message = 'Запрашиваемый путь не существует';
   res.status(error.status).json({ message: error.message });
 });
+
+app.use(errors());
 
 app.listen(PORT, () => {
   console.log(`Приложение запущено на порте ${PORT}`);
