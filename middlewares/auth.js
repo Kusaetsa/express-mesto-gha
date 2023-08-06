@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { ERROR_UNAUTHORIZATE } = require('../utills/statusCodes');
+const { SECRET_KEY } = require('../utills/secret_key');
 
 function checkAuth(req, res, next) {
   const { authorization } = req.headers;
@@ -11,7 +12,7 @@ function checkAuth(req, res, next) {
   let payload;
 
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, SECRET_KEY);
   } catch (err) {
     return res.status(ERROR_UNAUTHORIZATE).send({ message: 'Ошибка авторизации' });
   }

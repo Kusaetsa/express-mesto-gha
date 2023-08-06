@@ -6,8 +6,10 @@ const mongoose = require('mongoose');
 
 const users = require('./routes/users');
 const cards = require('./routes/cards');
+const signin = require('./routes/signin');
+const signup = require('./routes/signup');
 const { ERROR_NOT_FOUND } = require('./utills/statusCodes');
-const { createUser, login } = require('./controllers/users');
+
 const { checkAuth } = require('./middlewares/auth');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
@@ -18,8 +20,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 const app = express();
 app.use(express.json());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use('/signin', signin);
+app.use('/signup', signup);
 app.use(checkAuth);
 app.use('/users', users);
 app.use('/cards', cards);

@@ -2,8 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  OK, CREATED, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZATE, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER,
+  OK,
+  CREATED,
+  ERROR_BAD_REQUEST,
+  ERROR_UNAUTHORIZATE,
+  ERROR_NOT_FOUND,
+  CONFLICT,
+  ERROR_INTERNAL_SERVER,
 } = require('../utills/statusCodes');
+const { SECRET_KEY } = require('../utills/secret_key');
 
 function getUsers(req, res) {
   return User.find({})
@@ -39,7 +46,7 @@ function createUser(req, res) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } if (err.code === 11000) {
         res.status(ERROR_BAD_REQUEST).send({ message: 'Пользователь с таким email уже существует' });
         return;
@@ -88,7 +95,7 @@ function login(req, res) {
   return User.findAndCheckUser(email, password)
     .then((user) => {
       const payload = { _id: user._id };
-      const token = jwt.sign(payload, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
       res.status(OK).send({ token });
     })
     .catch((err) => {

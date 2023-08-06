@@ -1,6 +1,11 @@
 const Card = require('../models/card');
 const {
-  OK, CREATED, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZATE, ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER,
+  OK,
+  CREATED,
+  ERROR_BAD_REQUEST,
+  FORBIDDEN,
+  ERROR_NOT_FOUND,
+  ERROR_INTERNAL_SERVER,
 } = require('../utills/statusCodes');
 
 function getCards(req, res) {
@@ -31,7 +36,7 @@ function deleteCard(req, res) {
     .orFail()
     .then((card) => {
       if (req.user._id !== card.owner.toString()) {
-        return res.status(ERROR_UNAUTHORIZATE).send({ message: 'Вы не можете удалять карточки других пользователей' });
+        return res.status(FORBIDDEN).send({ message: 'Вы не можете удалять карточки других пользователей' });
       }
       return res.status(OK).send(card);
     })
