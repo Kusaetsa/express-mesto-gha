@@ -42,13 +42,20 @@ function createUser(req, res) {
       email, name, about, avatar, password: hash,
     }))
     .then((user) => {
-      res.status(CREATED).send(user);
+      const sendUser = {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+      };
+      res.status(CREATED).send(sendUser);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } if (err.code === 11000) {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Пользователь с таким email уже существует' });
+        res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
         return;
       }
 
@@ -99,7 +106,7 @@ function login(req, res) {
       res.status(OK).send({ token });
     })
     .catch((err) => {
-      res.status(ERROR_BAD_REQUEST).send({ message: `Ошибка авторизации ${err}` });
+      res.status(ERROR_UNAUTHORIZATE).send({ message: `Ошибка авторизации ${err}` });
     });
 }
 
