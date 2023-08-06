@@ -99,7 +99,7 @@ function login(req, res) {
       res.status(OK).send({ token });
     })
     .catch((err) => {
-      res.status(ERROR_UNAUTHORIZATE).send({ message: `Ошибка авторизации ${err}` });
+      res.status(ERROR_BAD_REQUEST).send({ message: `Ошибка авторизации ${err}` });
     });
 }
 
