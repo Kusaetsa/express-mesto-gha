@@ -9,7 +9,7 @@ const users = require('./routes/users');
 const cards = require('./routes/cards');
 const signin = require('./routes/signin');
 const signup = require('./routes/signup');
-const { ERROR_NOT_FOUND } = require('./utills/statusCodes');
+const { ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER } = require('./utills/statusCodes');
 
 const { checkAuth } = require('./middlewares/auth');
 
@@ -35,6 +35,10 @@ app.use((req, res) => {
 });
 
 app.use(errors());
+
+app.use((err, req, res, next) => {
+  res.status(ERROR_INTERNAL_SERVER).send({ message: err.message });
+});
 
 app.listen(PORT, () => {
   console.log(`Приложение запущено на порте ${PORT}`);

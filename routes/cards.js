@@ -1,6 +1,6 @@
 const cardsRouter = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const { regexLink } = require('../utills/regex_link');
+const { regexLink } = require('../utills/regexLink');
 
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,

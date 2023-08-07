@@ -4,36 +4,31 @@ const User = require('../models/user');
 const {
   OK,
   CREATED,
-  ERROR_BAD_REQUEST,
-  ERROR_UNAUTHORIZATE,
-  ERROR_NOT_FOUND,
   CONFLICT,
-  ERROR_INTERNAL_SERVER,
 } = require('../utills/statusCodes');
-const { SECRET_KEY } = require('../utills/secret_key');
+const { SECRET_KEY } = require('../utills/secretKey');
+const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizateError = require('../errors/UnauthorizateError');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   return User.find({})
     .then((users) => res.status(OK).send(users))
-    .catch((err) => res.status(ERROR_INTERNAL_SERVER).send({ message: `Ошибка по умолчанию ${err}` }));
+    .catch(next);
 }
 
-function getUser(req, res) {
+function getUser(req, res, next) {
   return User.findById(req.params.userId)
     .orFail()
-    .then((user) => res.status(OK).send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Пользователь по указанному id не найден' });
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
-    });
+      return res.status(OK).send(user);
+    })
+    .catch(next);
 }
 
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
     email, password, name, about, avatar,
   } = req.body;
@@ -58,73 +53,70 @@ function createUser(req, res) {
         res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
         return;
       }
-
-      res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
+      next('Ошибка по умолчанию');
     });
 }
 
-function updateUserInfo(req, res) {
+function updateUserInfo(req, res, next) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.owner, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       return res.status(OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        res.status(CONFLICT).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       }
-      res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
+      next('Ошибка по умолчанию');
     });
 }
 
-function updateUserAvatar(req, res) {
+function updateUserAvatar(req, res, next) {
   const { avatar } = req.body;
   return User.findByIdAndUpdate(req.owner, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       return res.status(OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        return res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
-      return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
+      return next('Ошибка по умолчанию');
     });
 }
 
-function login(req, res) {
+function login(req, res, next) {
   const { email, password } = req.body;
   return User.findAndCheckUser(email, password)
     .then((user) => {
-      console.log('юзер тут =>', user);
+      if (!user) {
+        throw new UnauthorizateError('Ошибка авторизации');
+      }
       const payload = { _id: user._id };
       const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
+      console.log('юзер тут =>', user);
       console.log('токен тут =>', token);
       res.status(OK).send({ token });
     })
-    .catch((err) => {
-      res.status(ERROR_UNAUTHORIZATE).send({ message: `Ошибка авторизации ${err}` });
-    });
+    .catch(next);
 }
 
-function getCurrentUser(req, res) {
+function getCurrentUser(req, res, next) {
   return User.findById(req.user)
     .orFail()
-    .then((user) => res.status(OK).send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(ERROR_BAD_REQUEST).send({ message: 'Пользователь по указанному id не найден' });
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному id не найден' });
-      }
-      return res.status(ERROR_INTERNAL_SERVER).send({ message: 'Ошибка по умолчанию' });
-    });
+      return res.status(OK).send(user);
+    })
+    .catch(next);
 }
 
 module.exports = {

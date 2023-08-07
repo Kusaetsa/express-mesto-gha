@@ -47,6 +47,7 @@ userSchema.statics.findAndCheckUser = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
+        console.log('user в функции =>', user);
         return Promise.reject(new Error('Что-то не так с почтой или паролем1'));
       }
 
