@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
 
 const userSchema = new mongoose.Schema(
   {
@@ -48,13 +50,13 @@ userSchema.statics.findAndCheckUser = function (email, password) {
     .then((user) => {
       if (!user) {
         console.log('user в функции =>', user);
-        return Promise.reject(new Error('Что-то не так с почтой или паролем1'));
+        return Promise.reject(new NotFoundError('Что-то не так с почтой или паролем1'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Что-то не так с почтой или паролем2'));
+            return Promise.reject(new BadRequestError('Что-то не так с почтой или паролем2'));
           }
 
           return user;
