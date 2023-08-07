@@ -101,8 +101,10 @@ function login(req, res) {
   const { email, password } = req.body;
   return User.findAndCheckUser(email, password)
     .then((user) => {
+      console.log('юзер тут =>', user);
       const payload = { _id: user._id };
       const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
+      console.log('токен тут =>', token);
       res.status(OK).send({ token });
     })
     .catch((err) => {

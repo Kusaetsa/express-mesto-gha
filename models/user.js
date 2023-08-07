@@ -47,13 +47,13 @@ userSchema.statics.findAndCheckUser = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Что-то не так с почтой или паролем'));
+        return Promise.reject(new Error('Что-то не так с почтой или паролем1'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Что-то не так с почтой или паролем'));
+            return Promise.reject(new Error('Что-то не так с почтой или паролем2'));
           }
 
           return user;
