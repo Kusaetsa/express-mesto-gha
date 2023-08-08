@@ -32,7 +32,6 @@ function createCard(req, res, next) {
 
 function deleteCard(req, res, next) {
   Card.findByIdAndRemove(req.params.cardId)
-    .orFail()
     .then((card) => {
       if (req.user._id !== card.owner.toString()) {
         return res.status(FORBIDDEN).send({ message: 'Вы не можете удалять карточки других пользователей' });

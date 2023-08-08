@@ -18,7 +18,6 @@ function getUsers(req, res, next) {
 
 function getUser(req, res, next) {
   return User.findById(req.params.userId)
-    .orFail()
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id');
@@ -104,7 +103,6 @@ function login(req, res, next) {
 
 function getCurrentUser(req, res, next) {
   return User.findById(req.user)
-    .orFail()
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь по указанному id не найден');
