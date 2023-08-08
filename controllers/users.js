@@ -95,13 +95,8 @@ function login(req, res, next) {
   const { email, password } = req.body;
   return User.findAndCheckUser(email, password)
     .then((user) => {
-      if (!user) {
-        throw new UnauthorizateError('Ошибка авторизации');
-      }
       const payload = { _id: user._id };
       const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '7d' });
-      console.log('юзер тут =>', user);
-      console.log('токен тут =>', token);
       res.status(OK).send({ token });
     })
     .catch(next);

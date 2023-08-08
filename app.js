@@ -10,6 +10,9 @@ const cards = require('./routes/cards');
 const signin = require('./routes/signin');
 const signup = require('./routes/signup');
 const { ERROR_NOT_FOUND, ERROR_INTERNAL_SERVER } = require('./utills/statusCodes');
+const UnauthorizateError = require('./errors/UnauthorizateError');
+const BadRequestError = require('./errors/BadRequestError');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { checkAuth } = require('./middlewares/auth');
 
@@ -37,7 +40,17 @@ app.use((req, res) => {
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  res.status(ERROR_INTERNAL_SERVER).send({ message: err.message });
+  let statusCode = ERROR_INTERNAL_SERVER;
+
+  if (err instanceof UnauthorizateError) {
+    statusCode = err.statusCode;
+  } if (err instanceof BadRequestError) {
+    statusCode = err.statusCode;
+  } else if (err instanceof NotFoundError) {
+    statusCode = err.statusCode;
+  }
+
+  res.status(statusCode).send({ message: err.message });
 });
 
 app.listen(PORT, () => {
