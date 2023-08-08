@@ -33,14 +33,11 @@ function createCard(req, res, next) {
 function deleteCard(req, res, next) {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Переданы некорректные данные');
+      }
       if (req.user._id !== card.owner.toString()) {
         return res.status(FORBIDDEN).send({ message: 'Вы не можете удалять карточки других пользователей' });
-      }
-      if (!req.user._id) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
-      }
-      if (!card) {
-        throw new BadRequestError('Переданы некорректные данные');
       }
       return res.status(OK).send(card);
     })
@@ -55,11 +52,9 @@ function likeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
       }
-      if (!req.user._id) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
-      }
+
       res.status(OK).send(card);
     })
     .catch(next);
@@ -73,10 +68,7 @@ function dislikeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
-      }
-      if (!req.user._id) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
       }
       res.status(OK).send(card);
     })
