@@ -53,7 +53,6 @@ function likeCard(req, res, next) {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
     .then((card) => {
       if (!card) {
         throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
@@ -72,7 +71,6 @@ function dislikeCard(req, res, next) {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail()
     .then((card) => {
       if (!card) {
         throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
