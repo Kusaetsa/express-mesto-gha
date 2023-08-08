@@ -8,7 +8,6 @@ const {
 } = require('../utills/statusCodes');
 const { SECRET_KEY } = require('../utills/secretKey');
 const NotFoundError = require('../errors/NotFoundError');
-const UnauthorizateError = require('../errors/UnauthorizateError');
 
 function getUsers(req, res, next) {
   return User.find({})

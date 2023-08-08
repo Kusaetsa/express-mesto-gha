@@ -5,7 +5,6 @@ const {
   FORBIDDEN,
   CONFLICT,
 } = require('../utills/statusCodes');
-const BadRequestError = require('../errors/BadRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 
 function getCards(req, res, next) {
