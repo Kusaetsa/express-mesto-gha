@@ -4,10 +4,11 @@ const User = require('../models/user');
 const {
   OK,
   CREATED,
-  CONFLICT,
 } = require('../utills/statusCodes');
 const { SECRET_KEY } = require('../utills/secretKey');
 const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
 function getUsers(req, res, next) {
   return User.find({})
@@ -46,12 +47,11 @@ function createUser(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } if (err.code === 11000) {
-        res.status(CONFLICT).send({ message: 'Пользователь с таким email уже существует' });
-        return;
+        return next(new ConflictError('Пользователь с таким email уже существует'));
       }
-      next('Ошибка по умолчанию');
+      return next('Ошибка по умолчанию');
     });
 }
 
@@ -66,9 +66,9 @@ function updateUserInfo(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CONFLICT).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
-      next('Ошибка по умолчанию');
+      return next('Ошибка по умолчанию');
     });
 }
 
@@ -83,7 +83,7 @@ function updateUserAvatar(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        return next(new BadRequestError('Переданы некорректные данные'));
       }
       return next('Ошибка по умолчанию');
     });

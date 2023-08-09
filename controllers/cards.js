@@ -3,9 +3,8 @@ const {
   OK,
   CREATED,
   FORBIDDEN,
-  CONFLICT,
 } = require('../utills/statusCodes');
-const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
 
 function getCards(req, res, next) {
   return Card.find({})
@@ -22,23 +21,23 @@ function createCard(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CONFLICT).send({ message: 'Переданы некорректные данные при создании карточки' });
-        return;
+        return next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       }
-      next('Ошибка по умолчанию');
+      return next('Ошибка по умолчанию');
     });
 }
 
 function deleteCard(req, res, next) {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Переданы некорректные данные');
+        throw new BadRequestError('Переданы некорректные данные');
       }
       if (req.user._id !== card.owner.toString()) {
         return res.status(FORBIDDEN).send({ message: 'Вы не можете удалять карточки других пользователей' });
       }
-      return res.status(OK).send(card);
+      res.status(OK).send(card);
+      return Card.findByIdAndRemove(req.params.cardId);
     })
     .catch(next);
 }
@@ -51,7 +50,7 @@ function likeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
+        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
       }
 
       res.status(OK).send(card);
@@ -67,7 +66,7 @@ function dislikeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
+        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
       }
       res.status(OK).send(card);
     })
