@@ -5,6 +5,7 @@ const {
   FORBIDDEN,
 } = require('../utills/statusCodes');
 const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
 
 function getCards(req, res, next) {
   return Card.find({})
@@ -31,7 +32,7 @@ function deleteCard(req, res, next) {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new BadRequestError('Переданы некорректные данные');
+        throw new NotFoundError('Переданы некорректные данные');
       }
       if (req.user._id !== card.owner.toString()) {
         return res.status(FORBIDDEN).send({ message: 'Вы не можете удалять карточки других пользователей' });
@@ -50,7 +51,7 @@ function likeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
       }
 
       res.status(OK).send(card);
@@ -66,7 +67,7 @@ function dislikeCard(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        throw new BadRequestError('Переданы некорректные данные для постановки/снятии лайка');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка');
       }
       res.status(OK).send(card);
     })
